@@ -16,9 +16,6 @@ from app.api.v1.endpoints import admin_dashboard
 from app.middleware.rate_limit import RateLimitMiddleware
 
 
-# KHÔNG cần import slowapi nữa
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup & Shutdown lifecycle"""
@@ -32,7 +29,7 @@ def create_app() -> FastAPI:
         title="Bình Dân Học AI — AI Services",
         version="1.0.0",
         description="Internal AI Services Layer — Not for public access",
-        docs_url="/docs" if settings.ENV == "development" else None,
+        docs_url="/docs",  # Bật Swagger UI trên mọi môi trường
         redoc_url=None,
         lifespan=lifespan,
     )
@@ -45,7 +42,7 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(InternalAuthMiddleware)
     app.add_middleware(CorrelationIdMiddleware)
-    app.add_middleware(ErrorHandlerMiddleware)  # Đã xử lý hết lỗi quota
+    app.add_middleware(ErrorHandlerMiddleware)
     app.add_middleware(RateLimitMiddleware)
 
     # Routes
@@ -59,7 +56,7 @@ app = create_app()
 
 
 # ============================================================
-# Thêm nút Authorize vào Swagger UI
+# Custom OpenAPI để thêm nút Authorize vào Swagger UI
 # ============================================================
 def custom_openapi():
     if app.openapi_schema:
@@ -72,15 +69,13 @@ def custom_openapi():
         routes=app.routes,
     )
 
+    openapi_schema["components"] = openapi_schema.get("components", {})
     openapi_schema["components"]["securitySchemes"] = {
         "APIKeyHeader": {
             "type": "apiKey",
             "in": "header",
             "name": "X-Internal-Key",
-            "description": """Nhập API key:
-
-        - **Master key (admin)**: `bdh-internal-key-2024`
-        - **User key**: key dạng `bdh_...` (tạo từ admin API)"""
+            "description": "Nhập API key: **bdh-internal-key-2024**"
         }
     }
 
