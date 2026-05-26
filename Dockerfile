@@ -34,17 +34,11 @@ ENV PYTHONUNBUFFERED=1
 
 COPY . .
 
-# ⭐ THÊM SCRIPT KHỞI TẠO database
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-
 # Chạy với Gunicorn + Uvicorn workers trong production
 CMD ["gunicorn", "app.main:app", \
-    "--workers", "2", \
-    "--worker-class", "uvicorn.workers.UvicornWorker", \
-    "--bind", "0.0.0.0:8000", \
-    "--timeout", "120", \
-    "--graceful-timeout", "30", \
-    "--access-logfile", "-"]
+     "--workers", "2", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "120", \
+     "--graceful-timeout", "30", \
+     "--access-logfile", "-"]
